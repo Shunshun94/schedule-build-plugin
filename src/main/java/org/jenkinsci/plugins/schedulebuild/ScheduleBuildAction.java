@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.schedulebuild;
 
 import java.io.IOException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
@@ -146,6 +147,15 @@ public class ScheduleBuildAction implements Action, StaplerProxy {
         quietperiod = ddate.getTime() - now.getTime();
         if (quietperiod + ScheduleBuildAction.securityMargin < 0) { // 120 sec security margin
             return HttpResponses.redirectTo("error");
+        }
+        String message = String.format("Scheduling... %s @ %s", req.getRequestURI().replace("/schedule/next", ""), param.getString("date"));
+        LOGGER.info(message);
+
+        URL slackWebhockUrl = new ScheduleBuildGlobalConfiguration().getSlackWebhockAddress();
+        if(slackWebhockUrl != null) {
+        	(new ScheduleBuildSlackNotificationClient(slackWebhockUrl, "Schedule Build Notify")).sendNotify(message);
+        } else {
+        	LOGGER.info("Slack Webhock Url is not defined. Slack notification step is skipped.");
         }
         return HttpResponses.forwardToView(this, "redirect");
     }

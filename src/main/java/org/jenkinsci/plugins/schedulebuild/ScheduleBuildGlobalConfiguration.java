@@ -8,6 +8,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.*;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
@@ -18,11 +20,13 @@ import java.util.TimeZone;
 public class ScheduleBuildGlobalConfiguration extends GlobalConfiguration {
     private Date defaultScheduleTime;
     private String timeZone;
+    private URL slackWebhockAddress;
 
     @DataBoundConstructor
     public ScheduleBuildGlobalConfiguration() {
         this.defaultScheduleTime = new Date(0, 0, 0, 22, 0);
         this.timeZone = TimeZone.getDefault().getID();
+        this.slackWebhockAddress = null;
         load();
     }
 
@@ -56,6 +60,15 @@ public class ScheduleBuildGlobalConfiguration extends GlobalConfiguration {
         return new Date(this.defaultScheduleTime.getTime());
     }
 
+    public URL getSlackWebhockAddress() {
+    	return slackWebhockAddress;
+    }
+
+    @DataBoundSetter
+    public void setSlackWebhockAddress(URL url) {
+    	this.slackWebhockAddress = url;
+    }
+
     public FormValidation doCheckDefaultScheduleTime(@QueryParameter String value) {
         try {
             getTimeFormat().parse(value);
@@ -79,14 +92,22 @@ public class ScheduleBuildGlobalConfiguration extends GlobalConfiguration {
         // reset before data-binding
         this.defaultScheduleTime = null;
         this.timeZone = null;
+        this.slackWebhockAddress = null;
         if (json.containsKey("defaultScheduleTime") && json.containsKey("timeZone")) {
             try {
                 this.defaultScheduleTime = getTimeFormat().parse(json.getString("defaultScheduleTime"));
                 this.timeZone = json.getString("timeZone");
+                if(json.getString("slackWebhockAddress").isEmpty()) {
+                	this.slackWebhockAddress = null;
+                } else {
+                	this.slackWebhockAddress = new URL(json.getString("slackWebhockAddress"));
+                }
+                
                 save();
                 return true;
             } catch (ParseException ex) {
-            }
+            } catch (MalformedURLException e) {
+			}
         }
         return false;
     }

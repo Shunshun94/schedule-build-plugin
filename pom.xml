@@ -7,7 +7,7 @@
   </parent>
 
   <artifactId>schedule-build</artifactId>
-  <version>0.5.2-SNAPSHOT-hiyoko</version>
+  <version>0.5.2-hiyoko</version>
   <name>Schedule Build Plugin</name>
   <packaging>hpi</packaging>
   <description>Adds capability to schedule a build for a later point in time</description>

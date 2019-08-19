@@ -7,7 +7,10 @@
     <f:entry title="${%TimeZone}" field="timeZone">
       <f:textbox />
     </f:entry>
-    <f:entry title="${%SlackWebhockAddress}" field="slackWebhockAddress">
+    <f:entry title="${%SlackToken}" field="slackToken">
+      <f:password />
+    </f:entry>
+    <f:entry title="${%Channel}" field="channel">
       <f:textbox />
     </f:entry>
   </f:section>

@@ -8,8 +8,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.*;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
@@ -20,13 +18,14 @@ import java.util.TimeZone;
 public class ScheduleBuildGlobalConfiguration extends GlobalConfiguration {
     private Date defaultScheduleTime;
     private String timeZone;
-    private URL slackWebhockAddress;
+    private String slackToken;
+    private String channel;
 
     @DataBoundConstructor
     public ScheduleBuildGlobalConfiguration() {
         this.defaultScheduleTime = new Date(0, 0, 0, 22, 0);
         this.timeZone = TimeZone.getDefault().getID();
-        this.slackWebhockAddress = null;
+        this.slackToken = "";
         load();
     }
 
@@ -60,13 +59,22 @@ public class ScheduleBuildGlobalConfiguration extends GlobalConfiguration {
         return new Date(this.defaultScheduleTime.getTime());
     }
 
-    public URL getSlackWebhockAddress() {
-    	return slackWebhockAddress;
+    public String getSlackToken() {
+    	return slackToken;
     }
 
     @DataBoundSetter
-    public void setSlackWebhockAddress(URL url) {
-    	this.slackWebhockAddress = url;
+    public void setSlackWebhockAddress(String token) {
+    	this.slackToken = token;
+    }
+
+    public String getChannel() {
+    	return channel;
+    }
+
+    @DataBoundSetter
+    public void setChannel(String channel) {
+    	this.channel = channel;
     }
 
     public FormValidation doCheckDefaultScheduleTime(@QueryParameter String value) {
@@ -92,22 +100,17 @@ public class ScheduleBuildGlobalConfiguration extends GlobalConfiguration {
         // reset before data-binding
         this.defaultScheduleTime = null;
         this.timeZone = null;
-        this.slackWebhockAddress = null;
+        this.slackToken = null;
         if (json.containsKey("defaultScheduleTime") && json.containsKey("timeZone")) {
             try {
                 this.defaultScheduleTime = getTimeFormat().parse(json.getString("defaultScheduleTime"));
                 this.timeZone = json.getString("timeZone");
-                if(json.getString("slackWebhockAddress").isEmpty()) {
-                	this.slackWebhockAddress = null;
-                } else {
-                	this.slackWebhockAddress = new URL(json.getString("slackWebhockAddress"));
-                }
-                
+                this.slackToken = json.getString("slackToken");
+                this.channel = json.getString("channel");
                 save();
                 return true;
             } catch (ParseException ex) {
-            } catch (MalformedURLException e) {
-			}
+            }
         }
         return false;
     }
